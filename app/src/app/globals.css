@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+/* ========================================
+   ALYNEA DESIGN TOKENS (from Figma)
+   ======================================== */
+
+:root {
+  /* === Text Colors === */
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --text-tertiary: #C7C7CC;
+  --text-disabled: #D1D1D6;
+  --text-brand: #007AFF;
+  --text-brand-hover: #0051D5;
+
+  /* === Background Colors === */
+  --bg-base: #FFFFFF;
+  --bg-sidebar: #F5F5F4;
+  --bg-panel: #FAFAF9;
+  --bg-brand: #007AFF;
+  --bg-brand-hover: #0051D5;
+
+  /* === Border Colors === */
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-input: #D1D1D6;
+
+  /* === Semantic Colors === */
+  --priority-high: #FF3B30;
+  --priority-medium: #F6BD16;
+  --priority-low: #86868B;
+  --success: #34C759;
+  --warning: #F6BD16;
+  --error: #FF3B30;
+
+  /* === Project Colors === */
+  --project-work: #5B8FF9;
+  --project-personal: #61DDAA;
+  --project-ideas: #F6BD16;
+
+  /* === Shadows === */
+  --shadow-modal: 0 20px 60px -15px rgba(0, 0, 0, 0.25), 0 0 1px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  /* === Typography === */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* === Spacing (reference) === */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* === Border Radius === */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+}
+
+/* === Tailwind Theme Integration === */
+@theme inline {
+  /* Colors */
+  --color-background: var(--bg-base);
+  --color-foreground: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-brand: var(--bg-brand);
+
+  /* Typography */
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+}
+
+/* === Base Styles === */
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* === Typography Scale === */
+.text-display { font-size: 22px; font-weight: 500; }
+.text-heading { font-size: 20px; font-weight: 500; }
+.text-body-lg { font-size: 15px; font-weight: 400; }
+.text-body { font-size: 14px; font-weight: 400; }
+.text-caption { font-size: 13px; font-weight: 400; }
+.text-small { font-size: 12px; font-weight: 400; }
+.text-tiny { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* === Focus States (Accessibility) === */
+*:focus-visible {
+  outline: 2px solid var(--bg-brand);
+  outline-offset: 2px;
+}
+
+/* === Scrollbar Styling (macOS style) === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
