@@ -18,7 +18,7 @@ interface UseTasksReturn {
     tasks: Task[];
     isLoading: boolean;
     error: Error | null;
-    addTask: (task: TaskInsert) => Promise<Task | null>;
+    addTask: (task: Omit<TaskInsert, 'workspace_id'>) => Promise<Task | null>;
     updateTask: (id: string, updates: TaskUpdate) => Promise<Task | null>;
     deleteTask: (id: string) => Promise<boolean>;
     toggleTask: (id: string) => Promise<Task | null>;
@@ -37,8 +37,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
             setIsLoading(true);
             setError(null);
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            let query = (supabase as any)
+            let query = supabase
                 .from('tasks')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -62,7 +61,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
             const { data, error: fetchError } = await query;
 
             if (fetchError) throw fetchError;
-            setTasks((data as Task[]) || []);
+            setTasks(data || []);
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to fetch tasks'));
         } finally {
@@ -103,20 +102,19 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
         };
     }, [supabase]);
 
-    const addTask = async (taskData: TaskInsert): Promise<Task | null> => {
+    const addTask = async (taskData: Omit<TaskInsert, 'workspace_id'>): Promise<Task | null> => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data, error: insertError } = await (supabase as any)
+            // TODO: Get workspace_id from auth context
+            const { data, error: insertError } = await supabase
                 .from('tasks')
-                .insert(taskData)
+                .insert({ ...taskData, workspace_id: 'default' } as TaskInsert)
                 .select()
                 .single();
 
             if (insertError) throw insertError;
 
-            const newTask = data as Task;
-            setTasks((prev) => [newTask, ...prev]);
-            return newTask;
+            setTasks((prev) => [data, ...prev]);
+            return data;
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to add task'));
             return null;
@@ -130,8 +128,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
                 prev.map((t) => (t.id === id ? { ...t, ...updates } as Task : t))
             );
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data, error: updateError } = await (supabase as any)
+            const { data, error: updateError } = await supabase
                 .from('tasks')
                 .update(updates)
                 .eq('id', id)
@@ -145,7 +142,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
                 throw updateError;
             }
 
-            return data as Task;
+            return data;
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to update task'));
             return null;
@@ -157,8 +154,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
             const previousTask = tasks.find((t) => t.id === id);
             setTasks((prev) => prev.filter((t) => t.id !== id));
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { error: deleteError } = await (supabase as any)
+            const { error: deleteError } = await supabase
                 .from('tasks')
                 .delete()
                 .eq('id', id);

@@ -21,7 +21,7 @@ interface UseHabitsReturn {
     habits: HabitWithCheckins[];
     isLoading: boolean;
     error: Error | null;
-    addHabit: (habit: HabitInsert) => Promise<Habit | null>;
+    addHabit: (habit: Omit<HabitInsert, 'workspace_id'>) => Promise<Habit | null>;
     updateHabit: (id: string, updates: HabitUpdate) => Promise<Habit | null>;
     deleteHabit: (id: string) => Promise<boolean>;
     toggleCheckin: (habitId: string, date: string) => Promise<boolean>;
@@ -40,8 +40,7 @@ export function useHabits(options: UseHabitsOptions = {}): UseHabitsReturn {
             setIsLoading(true);
             setError(null);
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            let query = (supabase as any)
+            let query = supabase
                 .from('habits')
                 .select('*')
                 .order('sort_order', { ascending: true });
@@ -59,17 +58,16 @@ export function useHabits(options: UseHabitsOptions = {}): UseHabitsReturn {
             startDate.setDate(startDate.getDate() - 7);
             const startDateStr = startDate.toISOString().split('T')[0];
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data: checkinsData } = await (supabase as any)
+            const { data: checkinsData } = await supabase
                 .from('habit_checkins')
                 .select('habit_id, checkin_date')
                 .gte('checkin_date', startDateStr);
 
             // Combine habits with their checkins
-            const habitsWithCheckins: HabitWithCheckins[] = ((habitsData as Habit[]) || []).map(
+            const habitsWithCheckins: HabitWithCheckins[] = (habitsData || []).map(
                 (habit) => ({
                     ...habit,
-                    checkins: ((checkinsData as Array<{ habit_id: string; checkin_date: string }>) || [])
+                    checkins: (checkinsData || [])
                         .filter((c) => c.habit_id === habit.id)
                         .map((c) => c.checkin_date),
                 })
@@ -87,20 +85,18 @@ export function useHabits(options: UseHabitsOptions = {}): UseHabitsReturn {
         fetchHabits();
     }, [fetchHabits]);
 
-    const addHabit = async (habitData: HabitInsert): Promise<Habit | null> => {
+    const addHabit = async (habitData: Omit<HabitInsert, 'workspace_id'>): Promise<Habit | null> => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data, error: insertError } = await (supabase as any)
+            const { data, error: insertError } = await supabase
                 .from('habits')
-                .insert(habitData)
+                .insert({ ...habitData, workspace_id: 'default' } as HabitInsert)
                 .select()
                 .single();
 
             if (insertError) throw insertError;
 
-            const newHabit = data as Habit;
-            setHabits((prev) => [...prev, { ...newHabit, checkins: [] }]);
-            return newHabit;
+            setHabits((prev) => [...prev, { ...data, checkins: [] }]);
+            return data;
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to add habit'));
             return null;
@@ -109,8 +105,7 @@ export function useHabits(options: UseHabitsOptions = {}): UseHabitsReturn {
 
     const updateHabit = async (id: string, updates: HabitUpdate): Promise<Habit | null> => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data, error: updateError } = await (supabase as any)
+            const { data, error: updateError } = await supabase
                 .from('habits')
                 .update(updates)
                 .eq('id', id)
@@ -119,14 +114,13 @@ export function useHabits(options: UseHabitsOptions = {}): UseHabitsReturn {
 
             if (updateError) throw updateError;
 
-            const updatedHabit = data as Habit;
             setHabits((prev) =>
                 prev.map((h) =>
-                    h.id === id ? { ...h, ...updatedHabit } : h
+                    h.id === id ? { ...h, ...data } : h
                 )
             );
 
-            return updatedHabit;
+            return data;
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to update habit'));
             return null;
@@ -135,8 +129,7 @@ export function useHabits(options: UseHabitsOptions = {}): UseHabitsReturn {
 
     const deleteHabit = async (id: string): Promise<boolean> => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { error: deleteError } = await (supabase as any)
+            const { error: deleteError } = await supabase
                 .from('habits')
                 .delete()
                 .eq('id', id);
@@ -172,8 +165,7 @@ export function useHabits(options: UseHabitsOptions = {}): UseHabitsReturn {
             );
 
             if (hasCheckin) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const { error } = await (supabase as any)
+                const { error } = await supabase
                     .from('habit_checkins')
                     .delete()
                     .eq('habit_id', habitId)
@@ -184,9 +176,9 @@ export function useHabits(options: UseHabitsOptions = {}): UseHabitsReturn {
                 const checkinData: HabitCheckinInsert = {
                     habit_id: habitId,
                     checkin_date: date,
+                    workspace_id: 'default',
                 };
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const { error } = await (supabase as any).from('habit_checkins').insert(checkinData);
+                const { error } = await supabase.from('habit_checkins').insert(checkinData);
 
                 if (error) throw error;
             }

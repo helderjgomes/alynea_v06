@@ -16,7 +16,7 @@ interface UseProjectsReturn {
     projects: Project[];
     isLoading: boolean;
     error: Error | null;
-    addProject: (project: ProjectInsert) => Promise<Project | null>;
+    addProject: (project: Omit<ProjectInsert, 'workspace_id'>) => Promise<Project | null>;
     updateProject: (id: string, updates: ProjectUpdate) => Promise<Project | null>;
     deleteProject: (id: string) => Promise<boolean>;
     refetch: () => Promise<void>;
@@ -34,8 +34,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
             setIsLoading(true);
             setError(null);
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            let query = (supabase as any)
+            let query = supabase
                 .from('projects')
                 .select('*')
                 .order('sort_order', { ascending: true });
@@ -47,7 +46,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
             const { data, error: fetchError } = await query;
 
             if (fetchError) throw fetchError;
-            setProjects((data as Project[]) || []);
+            setProjects(data || []);
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to fetch projects'));
         } finally {
@@ -88,20 +87,18 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
         };
     }, [supabase]);
 
-    const addProject = async (projectData: ProjectInsert): Promise<Project | null> => {
+    const addProject = async (projectData: Omit<ProjectInsert, 'workspace_id'>): Promise<Project | null> => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data, error: insertError } = await (supabase as any)
+            const { data, error: insertError } = await supabase
                 .from('projects')
-                .insert(projectData)
+                .insert({ ...projectData, workspace_id: 'default' } as ProjectInsert)
                 .select()
                 .single();
 
             if (insertError) throw insertError;
 
-            const newProject = data as Project;
-            setProjects((prev) => [...prev, newProject]);
-            return newProject;
+            setProjects((prev) => [...prev, data]);
+            return data;
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to add project'));
             return null;
@@ -115,8 +112,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
                 prev.map((p) => (p.id === id ? { ...p, ...updates } as Project : p))
             );
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data, error: updateError } = await (supabase as any)
+            const { data, error: updateError } = await supabase
                 .from('projects')
                 .update(updates)
                 .eq('id', id)
@@ -130,7 +126,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
                 throw updateError;
             }
 
-            return data as Project;
+            return data;
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to update project'));
             return null;
@@ -142,8 +138,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
             const previousProject = projects.find((p) => p.id === id);
             setProjects((prev) => prev.filter((p) => p.id !== id));
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { error: deleteError } = await (supabase as any)
+            const { error: deleteError } = await supabase
                 .from('projects')
                 .delete()
                 .eq('id', id);

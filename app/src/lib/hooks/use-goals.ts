@@ -16,7 +16,7 @@ interface UseGoalsReturn {
     goals: Goal[];
     isLoading: boolean;
     error: Error | null;
-    addGoal: (goal: GoalInsert) => Promise<Goal | null>;
+    addGoal: (goal: Omit<GoalInsert, 'workspace_id'>) => Promise<Goal | null>;
     updateGoal: (id: string, updates: GoalUpdate) => Promise<Goal | null>;
     deleteGoal: (id: string) => Promise<boolean>;
     updateProgress: (id: string, currentValue: number) => Promise<Goal | null>;
@@ -35,8 +35,7 @@ export function useGoals(options: UseGoalsOptions = {}): UseGoalsReturn {
             setIsLoading(true);
             setError(null);
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            let query = (supabase as any)
+            let query = supabase
                 .from('objectives')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -48,7 +47,7 @@ export function useGoals(options: UseGoalsOptions = {}): UseGoalsReturn {
             const { data, error: fetchError } = await query;
 
             if (fetchError) throw fetchError;
-            setGoals((data as Goal[]) || []);
+            setGoals(data || []);
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to fetch goals'));
         } finally {
@@ -89,20 +88,18 @@ export function useGoals(options: UseGoalsOptions = {}): UseGoalsReturn {
         };
     }, [supabase]);
 
-    const addGoal = async (goalData: GoalInsert): Promise<Goal | null> => {
+    const addGoal = async (goalData: Omit<GoalInsert, 'workspace_id'>): Promise<Goal | null> => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data, error: insertError } = await (supabase as any)
+            const { data, error: insertError } = await supabase
                 .from('objectives')
-                .insert(goalData)
+                .insert({ ...goalData, workspace_id: 'default' } as GoalInsert)
                 .select()
                 .single();
 
             if (insertError) throw insertError;
 
-            const newGoal = data as Goal;
-            setGoals((prev) => [newGoal, ...prev]);
-            return newGoal;
+            setGoals((prev) => [data, ...prev]);
+            return data;
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to add goal'));
             return null;
@@ -116,8 +113,7 @@ export function useGoals(options: UseGoalsOptions = {}): UseGoalsReturn {
                 prev.map((g) => (g.id === id ? { ...g, ...updates } as Goal : g))
             );
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data, error: updateError } = await (supabase as any)
+            const { data, error: updateError } = await supabase
                 .from('objectives')
                 .update(updates)
                 .eq('id', id)
@@ -131,7 +127,7 @@ export function useGoals(options: UseGoalsOptions = {}): UseGoalsReturn {
                 throw updateError;
             }
 
-            return data as Goal;
+            return data;
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to update goal'));
             return null;
@@ -143,8 +139,7 @@ export function useGoals(options: UseGoalsOptions = {}): UseGoalsReturn {
             const previousGoal = goals.find((g) => g.id === id);
             setGoals((prev) => prev.filter((g) => g.id !== id));
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { error: deleteError } = await (supabase as any)
+            const { error: deleteError } = await supabase
                 .from('objectives')
                 .delete()
                 .eq('id', id);
