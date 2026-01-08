@@ -20,7 +20,7 @@ const SidebarItem = React.forwardRef<HTMLButtonElement, SidebarItemProps>(
                 ref={ref}
                 onClick={onClick}
                 className={cn(
-                    'w-full flex items-center justify-between px-2.5 py-1.5 rounded-md transition-all group',
+                    'w-full flex items-center justify-between px-2.5 py-1.5 rounded-md transition-all group active:scale-[0.98]',
                     active
                         ? 'bg-[#007AFF]/10 text-[#007AFF]'
                         : 'text-[#1D1D1F] hover:bg-black/[0.04]',

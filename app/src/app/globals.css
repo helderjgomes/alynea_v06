@@ -86,13 +86,42 @@ body {
 }
 
 /* === Typography Scale === */
-.text-display { font-size: 22px; font-weight: 500; }
-.text-heading { font-size: 20px; font-weight: 500; }
-.text-body-lg { font-size: 15px; font-weight: 400; }
-.text-body { font-size: 14px; font-weight: 400; }
-.text-caption { font-size: 13px; font-weight: 400; }
-.text-small { font-size: 12px; font-weight: 400; }
-.text-tiny { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.text-display {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.text-heading {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.text-body-lg {
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.text-body {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.text-caption {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.text-small {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.text-tiny {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 
 /* === Focus States (Accessibility) === */
 *:focus-visible {
@@ -117,4 +146,24 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.25);
+}
+
+/* === Custom Scrollbar (Explicitly for high-density areas) === */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
 }

@@ -29,7 +29,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                             variant === 'ghost',
 
                         // Title - Large heading input
-                        'px-0 text-[20px] font-medium text-[#1D1D1F] bg-transparent border-none':
+                        'px-0 text-[26px] font-medium text-[#1D1D1F] bg-transparent border-none':
                             variant === 'title',
                     },
 

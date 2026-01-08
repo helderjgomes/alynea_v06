@@ -4,6 +4,9 @@ import * as React from 'react';
 import { TopBar } from '@/components/layout/topbar';
 import { TaskRow } from '@/components/ui/task-row';
 import { SectionHeader } from '@/components/ui/section-header';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Sun } from 'lucide-react';
+
 
 interface Task {
     id: string;
@@ -75,11 +78,11 @@ export function TodayView({
                 <div>
                     <SectionHeader title="Today" />
                     {incompleteTasks.length === 0 ? (
-                        <div className="py-12 text-center">
-                            <p className="text-[14px] text-[#86868B]">
-                                All done for today! 🎉
-                            </p>
-                        </div>
+                        <EmptyState
+                            icon={Sun}
+                            title="All done for today!"
+                            description="You've completed all your scheduled tasks. Time to recharge."
+                        />
                     ) : (
                         <div className="bg-white rounded-xl border border-black/[0.04] overflow-hidden mt-1">
                             {incompleteTasks.map((task) => (

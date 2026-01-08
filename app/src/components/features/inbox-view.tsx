@@ -3,6 +3,10 @@
 import * as React from 'react';
 import { TopBar } from '@/components/layout/topbar';
 import { TaskRow } from '@/components/ui/task-row';
+import { SortableList, SortableTaskRow } from '@/components/dnd';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Inbox } from 'lucide-react';
+
 
 interface Task {
     id: string;
@@ -19,6 +23,7 @@ interface InboxViewProps {
     onTaskToggle: (id: string) => void;
     onTaskClick: (id: string) => void;
     onNewTask: () => void;
+    onReorder?: (tasks: Task[]) => void;
 }
 
 export function InboxView({
@@ -26,9 +31,16 @@ export function InboxView({
     onTaskToggle,
     onTaskClick,
     onNewTask,
+    onReorder,
 }: InboxViewProps) {
     const incompleteTasks = tasks.filter((t) => !t.completed);
     const completedTasks = tasks.filter((t) => t.completed);
+
+    const handleReorder = (reorderedTasks: Task[]) => {
+        // Merge reordered incomplete tasks with completed tasks
+        const newTaskList = [...reorderedTasks, ...completedTasks];
+        onReorder?.(newTaskList);
+    };
 
     return (
         <div className="h-full flex flex-col">
@@ -40,41 +52,39 @@ export function InboxView({
             />
 
             <div className="flex-1 overflow-y-auto">
-                {/* Incomplete tasks */}
+                {/* Incomplete tasks with DnD */}
                 <div className="px-4 py-2">
                     {incompleteTasks.length === 0 ? (
-                        <div className="py-12 text-center">
-                            <p className="text-[14px] text-[#86868B]">
-                                No tasks in inbox
-                            </p>
-                            <button
-                                onClick={onNewTask}
-                                className="mt-2 text-[14px] text-[#007AFF] hover:underline"
-                            >
-                                Add a task
-                            </button>
-                        </div>
+                        <EmptyState
+                            icon={Inbox}
+                            title="Your inbox is clear"
+                            description="Take a moment to relax, or start planning your next big thing."
+                            actionLabel="Add a Task"
+                            onAction={onNewTask}
+                        />
                     ) : (
-                        <div className="bg-white rounded-xl border border-black/[0.04] overflow-hidden">
-                            {incompleteTasks.map((task) => (
-                                <TaskRow
-                                    key={task.id}
-                                    id={task.id}
-                                    title={task.title}
-                                    notes={task.notes}
-                                    completed={task.completed}
-                                    dueDate={task.dueDate}
-                                    project={task.project}
-                                    priority={task.priority}
-                                    onToggle={onTaskToggle}
-                                    onClick={onTaskClick}
-                                />
-                            ))}
+                        <div className="bg-white rounded-xl border border-black/[0.04] overflow-hidden pl-6">
+                            <SortableList items={incompleteTasks} onReorder={handleReorder}>
+                                {incompleteTasks.map((task) => (
+                                    <SortableTaskRow
+                                        key={task.id}
+                                        id={task.id}
+                                        title={task.title}
+                                        notes={task.notes}
+                                        completed={task.completed}
+                                        dueDate={task.dueDate}
+                                        project={task.project}
+                                        priority={task.priority}
+                                        onToggle={onTaskToggle}
+                                        onClick={onTaskClick}
+                                    />
+                                ))}
+                            </SortableList>
                         </div>
                     )}
                 </div>
 
-                {/* Completed tasks */}
+                {/* Completed tasks (no DnD) */}
                 {completedTasks.length > 0 && (
                     <div className="px-4 py-2 mt-4">
                         <details className="group">

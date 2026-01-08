@@ -45,7 +45,7 @@ const TaskRow = React.forwardRef<HTMLDivElement, TaskRowProps>(
                 ref={ref}
                 className={cn(
                     'group flex items-start gap-3 py-2.5 px-3',
-                    'hover:bg-black/[0.02] transition-colors cursor-pointer',
+                    'hover:bg-black/[0.02] active:bg-black/[0.04] transition-all cursor-pointer active:scale-[0.99] origin-center',
                     'border-b border-black/[0.04] last:border-0',
                     className
                 )}

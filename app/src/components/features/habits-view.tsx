@@ -4,6 +4,8 @@ import * as React from 'react';
 import { TopBar } from '@/components/layout/topbar';
 import { Plus, Repeat, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EmptyState } from '@/components/ui/empty-state';
+
 
 interface Habit {
     id: string;
@@ -136,16 +138,13 @@ export function HabitsView({
                 </div>
 
                 {activeHabits.length === 0 && (
-                    <div className="py-12 text-center">
-                        <Repeat size={32} strokeWidth={1} className="mx-auto text-[#C7C7CC] mb-3" />
-                        <p className="text-[14px] text-[#86868B]">No habits yet</p>
-                        <button
-                            onClick={onNewHabit}
-                            className="mt-2 text-[14px] text-[#007AFF] hover:underline"
-                        >
-                            Create your first habit
-                        </button>
-                    </div>
+                    <EmptyState
+                        icon={Repeat}
+                        title="Build new habits"
+                        description="Consistency is key. Start tracking a new habit to stay on top of your game."
+                        actionLabel="Create a Habit"
+                        onAction={onNewHabit}
+                    />
                 )}
             </div>
         </div>

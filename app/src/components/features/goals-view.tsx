@@ -5,6 +5,8 @@ import { TopBar } from '@/components/layout/topbar';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EmptyState } from '@/components/ui/empty-state';
+
 
 interface Goal {
     id: string;
@@ -114,16 +116,13 @@ export function GoalsView({ goals, onGoalClick, onNewGoal }: GoalsViewProps) {
                 </div>
 
                 {activeGoals.length === 0 && (
-                    <div className="py-12 text-center">
-                        <Target size={32} strokeWidth={1} className="mx-auto text-[#C7C7CC] mb-3" />
-                        <p className="text-[14px] text-[#86868B]">No goals yet</p>
-                        <button
-                            onClick={onNewGoal}
-                            className="mt-2 text-[14px] text-[#007AFF] hover:underline"
-                        >
-                            Create your first goal
-                        </button>
-                    </div>
+                    <EmptyState
+                        icon={Target}
+                        title="No active goals"
+                        description="Goals help you stay focused on what matters most in the long run."
+                        actionLabel="Create your first goal"
+                        onAction={onNewGoal}
+                    />
                 )}
 
                 {/* Completed Goals */}

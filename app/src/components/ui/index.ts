@@ -6,6 +6,8 @@ export { Badge, type BadgeProps } from './badge';
 export { Avatar, type AvatarProps } from './avatar';
 export { SidebarItem, type SidebarItemProps } from './sidebar-item';
 export { TaskRow, type TaskRowProps } from './task-row';
+export * from './empty-state';
+
 export { SectionHeader, type SectionHeaderProps } from './section-header';
 export {
     Modal,

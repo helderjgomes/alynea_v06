@@ -30,7 +30,7 @@ ModalOverlay.displayName = DialogPrimitive.Overlay.displayName;
 const ModalContent = React.forwardRef<
     React.ElementRef<typeof DialogPrimitive.Content>,
     React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
-        size?: 'sm' | 'md' | 'lg' | 'xl';
+        size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
     }
 >(({ className, children, size = 'lg', ...props }, ref) => (
     <ModalPortal>
@@ -52,6 +52,7 @@ const ModalContent = React.forwardRef<
                     'w-full max-w-lg': size === 'md',
                     'w-full max-w-2xl': size === 'lg',
                     'w-full max-w-4xl': size === 'xl',
+                    'w-full max-w-6xl': size === '2xl',
                 },
                 className
             )}
