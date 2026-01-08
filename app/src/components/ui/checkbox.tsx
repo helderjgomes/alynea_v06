@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,15 +24,16 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
         const borderColor = priority && !checked ? priorityColors[priority] : undefined;
 
         return (
-            <button
+            <motion.button
                 ref={ref}
                 type="button"
                 role="checkbox"
                 aria-checked={checked}
                 disabled={disabled}
                 onClick={() => onCheckedChange?.(!checked)}
+                whileTap={{ scale: 0.9 }}
                 className={cn(
-                    'flex-shrink-0 w-[18px] h-[18px] rounded-full border-2 transition-all',
+                    'flex-shrink-0 w-[18px] h-[18px] rounded-full border-2 transition-colors',
                     'flex items-center justify-center',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] focus-visible:ring-offset-2',
                     'disabled:cursor-not-allowed disabled:opacity-50',
@@ -44,10 +46,23 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
                     borderColor: !checked ? borderColor : undefined,
                 }}
             >
-                {checked && (
-                    <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                )}
-            </button>
+                <AnimatePresence>
+                    {checked && (
+                        <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{
+                                type: 'spring',
+                                stiffness: 500,
+                                damping: 25,
+                            }}
+                        >
+                            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </motion.button>
         );
     }
 );
