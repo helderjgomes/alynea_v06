@@ -335,6 +335,32 @@ export interface Database {
                     updated_at?: string
                 }
             }
+            habit_checkins: {
+                Row: {
+                    id: string
+                    workspace_id: string
+                    habit_id: string
+                    checkin_date: string
+                    notes: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    workspace_id?: string
+                    habit_id: string
+                    checkin_date: string
+                    notes?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    workspace_id?: string
+                    habit_id?: string
+                    checkin_date?: string
+                    notes?: string | null
+                    created_at?: string
+                }
+            }
         }
         Views: {
             [_ in never]: never
