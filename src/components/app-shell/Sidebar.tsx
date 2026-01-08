@@ -3,179 +3,104 @@
 /**
  * Sidebar
  * 
- * Apple HIG inspired navigation sidebar.
- * Calm, narrow, collapsible. Content-first.
+ * Apple HIG navigation with traffic lights.
+ * Clean, narrow, semantic colors for projects.
  */
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-    Inbox,
-    Sun,
-    Calendar,
-    FolderKanban,
-    ChevronLeft,
-    ChevronRight
-} from 'lucide-react';
-
-interface SidebarProps {
-    collapsed: boolean;
-    onToggle: () => void;
-}
+import { Inbox, Calendar, Clock } from 'lucide-react';
 
 interface NavItem {
-    href: string;
-    label: string;
-    icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
-    shortcut?: string;
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  count?: number;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  color: string;
+}
+
+interface SidebarProps {
+  taskCount?: number;
+  projects?: Project[];
 }
 
 const navItems: NavItem[] = [
-    { href: '/', label: 'Inbox', icon: Inbox, shortcut: '⌘1' },
-    { href: '/today', label: 'Today', icon: Sun, shortcut: '⌘2' },
-    { href: '/upcoming', label: 'Upcoming', icon: Calendar, shortcut: '⌘3' },
-    { href: '/projects', label: 'Projects', icon: FolderKanban, shortcut: '⌘4' },
+  { href: '/', label: 'Inbox', icon: <Inbox size={14} /> },
+  { href: '/today', label: 'Today', icon: <Calendar size={14} /> },
+  { href: '/upcoming', label: 'Upcoming', icon: <Clock size={14} /> },
 ];
 
-export function Sidebar({ collapsed, onToggle }: SidebarProps) {
-    const pathname = usePathname();
+export function Sidebar({ taskCount = 0, projects = [] }: SidebarProps) {
+  const pathname = usePathname();
 
-    return (
-        <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-            <div className="sidebar-header">
-                {!collapsed && <span className="logo">Alynea</span>}
-                <button
-                    className="collapse-toggle"
-                    onClick={onToggle}
-                    aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+  return (
+    <aside className="w-64 h-full bg-[#F2F2F7]/95 backdrop-blur-xl border-r border-[#D1D1D6]/50 flex flex-col shrink-0">
+      {/* Traffic Lights */}
+      <div className="h-12 px-4 flex items-center gap-2">
+        <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+        <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+        <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+      </div>
+
+      {/* Navigation */}
+      <div className="flex-1 px-2 space-y-6 overflow-y-auto pt-2">
+        <nav className="space-y-0.5">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md transition-all outline-none group ${isActive
+                    ? "bg-[#007AFF]/10 text-[#007AFF] font-medium"
+                    : "hover:bg-[#E5E5EA]/50 text-[#48484A]"
+                  }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className={isActive ? "text-[#007AFF]" : "text-[#8E8E93]"}>
+                    {item.icon}
+                  </span>
+                  <span className="text-[12px] tracking-tight">{item.label}</span>
+                </div>
+                {item.label === 'Inbox' && taskCount > 0 && (
+                  <span className={`text-[10px] font-medium ${isActive ? "text-[#007AFF]" : "opacity-40"}`}>
+                    {taskCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Projects */}
+        {projects.length > 0 && (
+          <div className="space-y-1">
+            <h3 className="px-3 text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest">
+              Projects
+            </h3>
+            <nav className="space-y-0.5">
+              {projects.map((project) => (
+                <Link
+                  key={project.id}
+                  href={`/projects/${project.id}`}
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md transition-all hover:bg-[#E5E5EA]/50 text-[#48484A]"
                 >
-                    {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-                </button>
-            </div>
-
-            <nav className="sidebar-nav">
-                {navItems.map((item) => {
-                    const isActive = pathname === item.href;
-                    const Icon = item.icon;
-
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={`nav-item ${isActive ? 'active' : ''}`}
-                            title={collapsed ? item.label : undefined}
-                        >
-                            <Icon size={18} strokeWidth={1.5} />
-                            {!collapsed && (
-                                <>
-                                    <span className="nav-label">{item.label}</span>
-                                    {item.shortcut && (
-                                        <span className="nav-shortcut">{item.shortcut}</span>
-                                    )}
-                                </>
-                            )}
-                        </Link>
-                    );
-                })}
+                  <div
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: project.color }}
+                  />
+                  <span className="text-[12px] tracking-tight">{project.name}</span>
+                </Link>
+              ))}
             </nav>
-
-            <style jsx>{`
-        .sidebar {
-          width: var(--sidebar-width);
-          background: var(--color-bg-secondary);
-          border-right: 1px solid var(--color-divider);
-          display: flex;
-          flex-direction: column;
-          transition: width var(--transition-normal);
-          flex-shrink: 0;
-        }
-
-        .sidebar.collapsed {
-          width: 52px;
-        }
-
-        .sidebar-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: var(--space-4);
-          height: 52px;
-        }
-
-        .logo {
-          font-family: var(--font-display);
-          font-size: 15px;
-          font-weight: 600;
-          color: var(--color-text-primary);
-          letter-spacing: -0.01em;
-        }
-
-        .collapse-toggle {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 24px;
-          height: 24px;
-          border: none;
-          background: transparent;
-          color: var(--color-text-secondary);
-          cursor: pointer;
-          border-radius: var(--radius-sm);
-          transition: all var(--transition-fast);
-        }
-
-        .collapse-toggle:hover {
-          background: var(--color-divider);
-          color: var(--color-text-primary);
-        }
-
-        .sidebar-nav {
-          flex: 1;
-          padding: var(--space-2);
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .nav-item {
-          display: flex;
-          align-items: center;
-          gap: var(--space-3);
-          padding: var(--space-2) var(--space-3);
-          border-radius: var(--radius-md);
-          color: var(--color-text-secondary);
-          text-decoration: none;
-          font-size: 13px;
-          font-weight: 500;
-          transition: all var(--transition-fast);
-          cursor: pointer;
-        }
-
-        .nav-item:hover {
-          background: rgba(0, 0, 0, 0.04);
-          color: var(--color-text-primary);
-        }
-
-        .nav-item.active {
-          background: rgba(0, 0, 0, 0.06);
-          color: var(--color-text-primary);
-        }
-
-        .sidebar.collapsed .nav-item {
-          justify-content: center;
-          padding: var(--space-2);
-        }
-
-        .nav-label {
-          flex: 1;
-        }
-
-        .nav-shortcut {
-          font-size: 11px;
-          color: var(--color-text-tertiary);
-          font-weight: 400;
-        }
-      `}</style>
-        </aside>
-    );
+          </div>
+        )}
+      </div>
+    </aside>
+  );
 }

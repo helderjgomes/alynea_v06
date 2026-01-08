@@ -3,13 +3,12 @@
 /**
  * Upcoming Page
  * 
- * Forward-looking task list (next 7 days).
- * Simple grouped list, not a dense calendar grid.
+ * Tasks for the next 7 days, grouped by date.
  */
 
 import { useEffect, useMemo } from 'react';
 import { TopBar } from '@/components/app-shell';
-import { TaskList, TaskEditor } from '@/components/tasks';
+import { TaskRow, TaskModal } from '@/components/tasks';
 import { useTaskStore } from '@/stores';
 import type { Task } from '@/types/database';
 
@@ -79,119 +78,58 @@ export default function UpcomingPage() {
         return groups;
     }, [upcomingTasks]);
 
-    const selectedTask = allTasks.find((t) => t.id === selectedTaskId) || null;
-    const projectsMap = new Map(projects.map((p) => [p.id, p]));
-
-    const handleSelectTask = (task: Task) => {
-        selectTask(task.id === selectedTaskId ? null : task.id);
-    };
+    const selectedTask = allTasks.find(t => t.id === selectedTaskId);
+    const projectsMap = new Map(projects.map(p => [p.id, p]));
 
     return (
-        <div className="upcoming-page">
+        <>
             <TopBar title="Upcoming" />
 
-            <div className="upcoming-content">
-                <div className="task-list-container">
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div className="max-w-4xl mx-auto py-10 px-12">
                     {isLoading ? (
-                        <div className="loading">Loading tasks...</div>
+                        <div className="py-12 text-center text-[#8E8E93] text-[14px]">
+                            Loading tasks...
+                        </div>
                     ) : groupedTasks.length === 0 ? (
-                        <div className="empty-state">
-                            <p>No upcoming tasks</p>
-                            <span>Tasks with due dates will appear here.</span>
+                        <div className="py-12 text-center">
+                            <p className="text-[15px] text-[#8E8E93] font-medium">No upcoming tasks</p>
+                            <p className="text-[13px] text-[#C7C7CC] mt-1">Tasks with due dates will appear here.</p>
                         </div>
                     ) : (
-                        <div className="grouped-tasks">
+                        <div className="space-y-8">
                             {groupedTasks.map(({ date, label, tasks }) => (
-                                <div key={date} className="date-group">
-                                    <h3 className="date-label">{label}</h3>
-                                    <TaskList
-                                        tasks={tasks}
-                                        projects={projectsMap}
-                                        selectedTaskId={selectedTaskId}
-                                        onToggleComplete={toggleComplete}
-                                        onSelectTask={handleSelectTask}
-                                    />
+                                <div key={date}>
+                                    <h3 className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-widest mb-3 px-3">
+                                        {label}
+                                    </h3>
+                                    <div className="space-y-[1px]">
+                                        {tasks.map(task => (
+                                            <TaskRow
+                                                key={task.id}
+                                                task={task}
+                                                project={task.project_id ? projectsMap.get(task.project_id) : null}
+                                                isSelected={task.id === selectedTaskId}
+                                                onToggle={() => toggleComplete(task.id, task.status !== 'done')}
+                                                onClick={() => selectTask(task.id)}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
-
-                {selectedTask && (
-                    <TaskEditor
-                        task={selectedTask}
-                        projects={projects}
-                        onUpdate={updateTask}
-                        onClose={() => selectTask(null)}
-                    />
-                )}
             </div>
 
-            <style jsx>{`
-        .upcoming-page {
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-          min-height: 0;
-        }
-
-        .upcoming-content {
-          display: flex;
-          flex: 1;
-          min-height: 0;
-        }
-
-        .task-list-container {
-          flex: 1;
-          overflow-y: auto;
-          min-width: 0;
-          padding: var(--space-4);
-        }
-
-        .loading,
-        .empty-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: var(--space-12);
-          color: var(--color-text-secondary);
-          font-size: 14px;
-          text-align: center;
-        }
-
-        .empty-state p {
-          font-size: 15px;
-          font-weight: 500;
-          margin: 0 0 var(--space-2);
-        }
-
-        .empty-state span {
-          color: var(--color-text-tertiary);
-          font-size: 13px;
-        }
-
-        .grouped-tasks {
-          display: flex;
-          flex-direction: column;
-          gap: var(--space-6);
-        }
-
-        .date-group {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .date-label {
-          font-size: 12px;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: var(--color-text-secondary);
-          margin: 0 0 var(--space-2);
-          padding: 0 var(--space-3);
-        }
-      `}</style>
-        </div>
+            {selectedTask && (
+                <TaskModal
+                    task={selectedTask}
+                    projects={projects}
+                    onUpdate={updateTask}
+                    onClose={() => selectTask(null)}
+                />
+            )}
+        </>
     );
 }
